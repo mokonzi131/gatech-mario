@@ -4,3 +4,10 @@
 *.jar
 *.war
 *.ear
+
+# MAC crap #
+.DS_store
+
+# Windows crap #
+Thumbs.db
+
