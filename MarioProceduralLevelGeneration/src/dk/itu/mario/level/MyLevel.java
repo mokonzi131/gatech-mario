@@ -17,7 +17,7 @@ public class MyLevel extends Level{
 	 public   int BLOCKS_POWER = 0; // the number of power blocks
 	 public   int COINS = 0; //These are the coins in boxes that Mario collect
 
- 
+ //This is a comment
 	private static Random levelSeedRandom = new Random();
 	    public static long lastSeed;
 
