@@ -656,6 +656,95 @@ public class MyLevel extends Level{
 	        return clone;
 
 	      }
+	    
+	    public int getPlayerClass(GamePlay playerMetrics){
+	    	
+	    	//convert metrics to an array so it is easy to work with
+	    	int[] metrics=convertMetrics(playerMetrics);
+	    	
+	    	
+	    	int numFeatures=50;//how many metrics
+	    	int numBins=10;//number of bins
+	    	int numClasses;
+	    	double[][][] conditionalProbability=new double[numFeatures][numBins][numClasses];
+	    	//TODO
+	    	//values assigned to this array will be pasted here later after theyre
+	    	//computed from data.
+	    	
+	    	//compute P(observation and class)
+	    	//assassin=0, coin collector=1, racer=2, explorer=3
+	    	
+	    	//compute probability of assassin:
+	    	double[] pClass=new double[4];
+	    	
+	    	for(int c=0; c<numClasses; c++){//loop through each class
+	    	
+	    	for(int i=0; i<numFeatures; i++){
+	    		pClass[c]=pClass[c]*conditionalProbability[i][getBin(metrics[i])][0];
+	    	}
+	    	
+	    	double pData=0.0;
+	    	for(int i=0; i<numClassess; i++){
+	    		double probability=1.0;
+	    		for(int j=0; j<numFeatures;j++){
+	    			probability=probability*conditionalProbability[j][getBin(metrics[j])][i]
+	    		}
+	    		pData=pData+probability;
+	    	}
+	    	pClass[c]=pClass[c]/pData;
+	    	
+	    	}//end of class loop
+	    	
+	    	//get class with maximum posterior probability
+	    	double max=Double.NEGATIVE_INFINITY;
+	    	int bestClass=0;
+	    	for(int i=0; i<numClasses; i++){
+	    		if(pClass[i]>max){
+	    			bestClass=i;
+	    			max=pClass[i];
+	    		}
+	    	}
+	    	
+	    	return bestClass;
+	    }
+	    
+	    private int getBin(int value){
+	    	if(value<=10){
+	    		return 0;
+	    	}
+	    	else if(value <=20){
+	    		return 1;
+	    	}
+	    	else if(value <=30){
+	    		return 2;
+	    	}
+	    	else if(value<=40){
+	    		return 3;
+	    	}
+	    	else if(value <=50){
+	    		return 4;
+	    	}
+	    	else if(value <=60){
+	    		return 5;
+	    	}
+	    	else if(value <=70){
+	    		return 6;
+	    	}
+	    	else if(value <=80){
+	    		return 7;
+	    	}
+	    	else if(value <=90){
+	    		return 8;
+	    	}
+	    	else{
+	    		return 9;
+	    	}
+	    }
+	    
+	    private int[] convertMetrics(GamePlay playerMetrics){
+	    	//TODO convert list of metrics from playerMetrics into an array
+	    	return null;
+	    }
 
 
 }
