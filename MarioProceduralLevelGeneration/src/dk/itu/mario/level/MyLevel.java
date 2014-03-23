@@ -657,6 +657,57 @@ public class MyLevel extends Level{
 
 	      }
 	    
+	    private int buildEnemyDitch(int xo, int maxLength)
+	    {
+	        int length = random.nextInt(10) + 2;
+
+	        if (length > maxLength)
+	        	length = maxLength;
+
+	        int floor = height - 1 - random.nextInt(4);
+
+	        //runs from the specified x position to the length of the segment
+		for (int y = 0; y < height; y++)
+	            {
+	                if (y >= floor-1)
+	                {
+	                    setBlock(xo, y, GROUND);
+	                }
+	            }
+
+	        for (int x = xo+1; x < xo + length-1; x++)
+	        {
+	            for (int y = 0; y < height; y++)
+	            {
+	                if (y >= floor)
+	                {
+	                    setBlock(x, y, GROUND);
+	                }
+	            }
+	        }
+
+		for (int y = 0; y < height; y++)
+	            {
+	                if (y >= floor-1)
+	                {
+	                    setBlock(xo+length-1, y, GROUND);
+	                }
+	            }
+
+		//Place enemies:
+		
+		for (int x = xo+1; x < xo+length-1; x++)
+	        {
+	                type = Enemy.ENEMY_GOOMBA;
+	                setSpriteTemplate(x, floor-1, new SpriteTemplate(type,false));
+	                ENEMIES++;
+	        }
+
+	   
+
+	        return length;
+	    }
+	    
 	    public int getPlayerClass(GamePlay playerMetrics){
 	    	
 	    	//convert metrics to an array so it is easy to work with
