@@ -673,6 +673,32 @@ public class MyLevel extends Level{
 		return length;
 	}
 	    
+	    private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight){
+			int length=20;
+
+			if(length>maxLength)
+				length=maxLength;
+
+			 int floor = height - 1;	
+			for (int x = xo; x < xo + length; x++)
+	        	{
+			setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+	                    BLOCKS_EMPTY++;
+			}
+
+			setBlock(xo+length-1,floor-brickHeight-1,BLOCK_EMPTY);
+			BLOCKS_EMPTY++;
+
+			for (int x = xo+1; x < xo+length-1; x++)
+	        	{
+	                type = Enemy.ENEMY_GOOMBA;
+	                setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,false));
+	                ENEMIES++;
+	        	}
+
+			return length;
+		}
+	    
 	    private int buildEnemyDitch(int xo, int maxLength)
 	    {
 	        int length = random.nextInt(10) + 2;
