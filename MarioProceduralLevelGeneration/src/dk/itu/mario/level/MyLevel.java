@@ -770,7 +770,8 @@ public class MyLevel extends Level{
 	            {
 	                if (y >= floor-1)
 	                {
-	                    setBlock(xo, y, GROUND);
+	                    setBlock(xo, y, BLOCK_EMPTY);
+	                    BLOCKS_EMPTY++;
 	                }
 	            }
 
@@ -789,7 +790,8 @@ public class MyLevel extends Level{
 	            {
 	                if (y >= floor-1)
 	                {
-	                    setBlock(xo+length-1, y, GROUND);
+	                    setBlock(xo+length-1, y, BLOCK_EMPTY);
+	                    BLOCKS_EMPTY++;
 	                }
 	            }
 
