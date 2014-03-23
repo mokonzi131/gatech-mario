@@ -673,6 +673,29 @@ public class MyLevel extends Level{
 		return length;
 	}
 	    
+	    private int buildCoinWall(int xo, int maxLength){
+			int length = random.nextInt(10) + 2;
+
+	        	if (length > maxLength)
+	        	length = maxLength;
+		 	int floor = height - 1;
+
+			int coinHeight=random.nextInt(10)+2;
+			for(int x=xo; x<xo+length;x++){
+				for(int y=0; y<coinHeight; y++){
+					if(y==0){
+					setBlock(x,floor-y-1,BLOCK_EMPTY);
+					BLOCKS_EMPTY++;
+					}
+					else{
+					setBlock(x,floor-y-1,COIN);
+					COINS++;
+					}
+					
+				}
+			}
+			return length;
+		}
 	    
 	    private int buildCoinCage(int xo, int maxLength){
 			int length = random.nextInt(10) + 2;
