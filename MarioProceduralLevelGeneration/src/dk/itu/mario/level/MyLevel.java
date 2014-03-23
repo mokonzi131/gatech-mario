@@ -673,6 +673,40 @@ public class MyLevel extends Level{
 		return length;
 	}
 	    
+	    
+	    private int buildCoinCage(int xo, int maxLength){
+			int length = random.nextInt(10) + 2;
+
+	        	if (length > maxLength)
+	        	length = maxLength;
+		 	int floor = height - 1;
+
+			for(int i=0; i<4; i++){
+				setBlock(xo,floor-i-1,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
+			}
+
+			for(int i=xo+1; i<xo+length-1;i++){
+				for(int y=0; y<4; y++){
+					if(y==0){
+					setBlock(i,floor-y-1,BLOCK_EMPTY);
+					BLOCKS_EMPTY++;
+					}
+					else{
+					setBlock(i,floor-y-1,COIN);
+					COINS++;
+					}	
+				}
+			}
+
+			for(int i=0; i<4; i++){
+				setBlock(xo+length-1,floor-i-1,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
+			}
+
+			return length;
+		}
+	    
 	    private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight){
 			int length=20;
 
