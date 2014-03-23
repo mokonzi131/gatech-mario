@@ -657,6 +657,22 @@ public class MyLevel extends Level{
 
 	      }
 	    
+	    private int buildBrickCeiling(int xo, int maxLength, int brickHeight)
+    	{
+        int length = random.nextInt(10) + 2;
+
+        if (length > maxLength)
+        	length = maxLength;
+	 int floor = height - 1;	
+	for (int x = xo; x < xo + length; x++)
+        	{
+		setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+                    BLOCKS_EMPTY++;
+		}
+		
+		return length;
+	}
+	    
 	    private int buildEnemyDitch(int xo, int maxLength)
 	    {
 	        int length = random.nextInt(10) + 2;
