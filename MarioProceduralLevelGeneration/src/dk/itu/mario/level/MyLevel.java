@@ -669,7 +669,7 @@ public class MyLevel extends Level{
 		setBlock(x, floor - brickHeight, BLOCK_EMPTY);
                     BLOCKS_EMPTY++;
 		}
-		
+		//
 		return length;
 	}
 	    
