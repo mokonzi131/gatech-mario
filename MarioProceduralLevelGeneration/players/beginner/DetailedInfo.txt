@@ -1,0 +1,8 @@
+StartTime = -17
+Jump:  StTime = 40 EdTime = 54
+RightMove: StTime = 14 EdTime = 52
+RunState: StTime = 17 EdTime = 120
+RunState: StTime = 122 EdTime = 122
+LittleState: StTime = -17 EdTime = 122
+Totaltime = 139
+Die:  EnemyType = 2
