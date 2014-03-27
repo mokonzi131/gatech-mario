@@ -1,5 +1,6 @@
 package dk.itu.mario.level;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 import dk.itu.mario.MarioInterface.Constraints;
@@ -46,23 +47,19 @@ public class MyLevel extends Level {
 		
 		this(width, height);
 		
-		PLAYER_CLASS playerType = determinePlayerType(playerMetrics);
-		creat(seed, difficulty, type, playerType);
-	}
-	
-	private static PLAYER_CLASS determinePlayerType(GamePlay metrics) {
-		System.out.println("Choose Beginner!");
-		return PLAYER_CLASS.BEGINNER;
+		PLAYER_CLASS playerClass = determinePlayerClass(playerMetrics);
+		creat(seed, difficulty, type, playerClass);
 	}
 
-	public void creat(long seed, int difficulty, int type, PLAYER_CLASS playerType) {
+	public void creat(long seed, int difficulty, int type, PLAYER_CLASS playerClass) {
+		System.out.println("PLAYER CLASS: " + playerClass);
 
 		this.type = type;
 		this.difficulty = difficulty;
 
 		lastSeed = seed;
 		random = new Random(seed);
-
+		
 		// create the start location
 		int length = 0;
 		length += buildStraight(0, width, true);
@@ -70,9 +67,9 @@ public class MyLevel extends Level {
 		// create all of the medium sections
 //		while (length < width - 64) {
 //			// length += buildZone(length, width - length);
-//			length += buildStraight(length, width - length, false);
-//			length += buildStraight(length, width - length, false);
-//			length += buildHillStraight(length, width - length);
+			length += buildStraight(length, width - length, false);
+			length += buildStraight(length, width - length, false);
+			length += buildHillStraight(length, width - length);
 //			length += buildJump(length, width - length);
 //			length += buildTubes(length, width - length);
 //			length += buildCannons(length, width - length);
@@ -708,59 +705,64 @@ public class MyLevel extends Level {
 		return length;
 	}
 
-	public int getPlayerClass(GamePlay playerMetrics) {
-
-		// convert metrics to an array so it is easy to work with
-		int[] metrics = convertMetrics(playerMetrics);
-
-		int numFeatures = 50;// how many metrics
-		int numBins = 10;// number of bins
-		int numClasses = 4;
-		double[][][] conditionalProbability = new double[numFeatures][numBins][numClasses];
-		// TODO
-		// values assigned to this array will be pasted here later after theyre
-		// computed from data.
-
-		// compute P(observation and class)
-		// assassin=0, coin collector=1, racer=2, explorer=3
-
-		// compute probability of assassin:
-		double[] pClass = new double[4];
-
-		for (int c = 0; c < numClasses; c++) {// loop through each class
-
-			for (int i = 0; i < numFeatures; i++) {
-				pClass[c] = pClass[c]
-						* conditionalProbability[i][getBin(metrics[i])][0];
-			}
-
-			double pData = 0.0;
-			for (int i = 0; i < numClasses; i++) {
-				double probability = 1.0;
-				for (int j = 0; j < numFeatures; j++) {
-					probability = probability
-							* conditionalProbability[j][getBin(metrics[j])][i];
-				}
-				pData = pData + probability;
-			}
-			pClass[c] = pClass[c] / pData;
-
-		}// end of class loop
-
-		// get class with maximum posterior probability
-		double max = Double.NEGATIVE_INFINITY;
-		int bestClass = 0;
-		for (int i = 0; i < numClasses; i++) {
-			if (pClass[i] > max) {
-				bestClass = i;
-				max = pClass[i];
-			}
-		}
-
-		return bestClass;
+	
+	private static PLAYER_CLASS determinePlayerClass(GamePlay gameplay) {
+		double[] metrics = parseMetrics(gameplay);
+		System.out.println(metrics);
+		
+		return PLAYER_CLASS.BEGINNER;
+		
+//		// convert metrics to an array so it is easy to work with
+//				int[] metrics = convertMetrics(playerMetrics);
+//
+//				int numFeatures = 50;// how many metrics
+//				int numBins = 10;// number of bins
+//				int numClasses = 4;
+//				double[][][] conditionalProbability = new double[numFeatures][numBins][numClasses];
+//				// TODO
+//				// values assigned to this array will be pasted here later after theyre
+//				// computed from data.
+//
+//				// compute P(observation and class)
+//				// assassin=0, coin collector=1, racer=2, explorer=3
+//
+//				// compute probability of assassin:
+//				double[] pClass = new double[4];
+//
+//				for (int c = 0; c < numClasses; c++) {// loop through each class
+//
+//					for (int i = 0; i < numFeatures; i++) {
+//						pClass[c] = pClass[c]
+//								* conditionalProbability[i][getBin(metrics[i])][0];
+//					}
+//
+//					double pData = 0.0;
+//					for (int i = 0; i < numClasses; i++) {
+//						double probability = 1.0;
+//						for (int j = 0; j < numFeatures; j++) {
+//							probability = probability
+//									* conditionalProbability[j][getBin(metrics[j])][i];
+//						}
+//						pData = pData + probability;
+//					}
+//					pClass[c] = pClass[c] / pData;
+//
+//				}// end of class loop
+//
+//				// get class with maximum posterior probability
+//				double max = Double.NEGATIVE_INFINITY;
+//				int bestClass = 0;
+//				for (int i = 0; i < numClasses; i++) {
+//					if (pClass[i] > max) {
+//						bestClass = i;
+//						max = pClass[i];
+//					}
+//				}
+//
+//				return bestClass;
 	}
 
-	private int getBin(int value) {
+	private static int getBin(int value) {
 		if (value <= 10) {
 			return 0;
 		} else if (value <= 20) {
@@ -784,8 +786,23 @@ public class MyLevel extends Level {
 		}
 	}
 
-	private int[] convertMetrics(GamePlay playerMetrics) {
-		// TODO convert list of metrics from playerMetrics into an array
-		return null;
+	private static double[] parseMetrics(GamePlay gameplay) {
+		Field[] fields = GamePlay.class.getFields();
+		double[] metrics = new double[fields.length];
+		for (int i = 0; i < fields.length; ++i) {
+			try {
+				metrics[i] = fields[i].getDouble(gameplay);
+			} catch (IllegalArgumentException e) {
+				//e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				//e.printStackTrace();
+			}
+		}
+		
+		for (int i = 0; i < fields.length; ++i) {
+			System.out.println("" + fields[i].getName() + "\t\t" + metrics[i]);
+		}
+		
+		return metrics;
 	}
 }
