@@ -540,7 +540,7 @@ public class MyLevel extends Level {
 		//
 		return length;
 	}
-
+///
 	private int buildCoinBox(int xo, int maxLength, int brickHeight){
 		int length = random.nextInt(10) + 2;
 		int boxHeight=random.nextInt(10)+3;
