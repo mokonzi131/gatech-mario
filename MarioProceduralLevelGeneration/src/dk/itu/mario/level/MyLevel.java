@@ -562,7 +562,30 @@ public class MyLevel extends Level {
 		//
 		return length;
 	}
+///
+	private int buildCoinBox(int xo, int maxLength, int brickHeight){
+		int length = random.nextInt(10) + 2;
+		int boxHeight=random.nextInt(10)+3;
 
+        	if (length > maxLength)
+        	length = maxLength;
+	 	int floor = height - 1;
+
+		for(int i=xo; i<xo+length; i++){
+			for(int j=floor-brickHeight-boxHeight; j<=floor-brickHeight; j++){
+				if(j==floor-brickHeight || j==floor-brickHeight-boxHeight||i==xo||i==xo+length-1){
+				setBlock(i,j,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
+				}
+				else{
+				setBlock(i,j,COIN);
+				COINS++;
+				}
+			}
+		}
+		return length;
+	}
+	
 	private int buildCoinWall(int xo, int maxLength) {
 		int length = random.nextInt(10) + 2;
 
