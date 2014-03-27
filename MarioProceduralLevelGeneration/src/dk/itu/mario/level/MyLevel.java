@@ -9,16 +9,22 @@ import dk.itu.mario.engine.sprites.SpriteTemplate;
 import dk.itu.mario.engine.sprites.Enemy;
 
 public class MyLevel extends Level {
+	private static enum PLAYER_CLASS {
+		BEGINNER,
+		ASSASSIN,
+		COLLECTOR,
+		RACER
+	}
+	
+	private static Random levelSeedRandom = new Random();
+	public static long lastSeed;
+	
 	// Store information about the level
 	public int ENEMIES = 0; // the number of enemies the level contains
 	public int BLOCKS_EMPTY = 0; // the number of empty blocks
 	public int BLOCKS_COINS = 0; // the number of coin blocks
 	public int BLOCKS_POWER = 0; // the number of power blocks
 	public int COINS = 0; // These are the coins in boxes that Mario collect
-
-	// This is a comment.
-	private static Random levelSeedRandom = new Random();
-	public static long lastSeed;
 
 	Random random;
 
@@ -30,14 +36,26 @@ public class MyLevel extends Level {
 		super(width, height);
 	}
 
-	public MyLevel(int width, int height, long seed, int difficulty, int type,
+	public MyLevel(
+			int width,
+			int height,
+			long seed,
+			int difficulty,
+			int type,
 			GamePlay playerMetrics) {
+		
 		this(width, height);
-		System.out.println("My Level");
-		creat(seed, difficulty, type);
+		
+		PLAYER_CLASS playerType = determinePlayerType(playerMetrics);
+		creat(seed, difficulty, type, playerType);
+	}
+	
+	private static PLAYER_CLASS determinePlayerType(GamePlay metrics) {
+		System.out.println("Choose Beginner!");
+		return PLAYER_CLASS.BEGINNER;
 	}
 
-	public void creat(long seed, int difficulty, int type) {
+	public void creat(long seed, int difficulty, int type, PLAYER_CLAS playerType) {
 
 		this.type = type;
 		this.difficulty = difficulty;
@@ -50,16 +68,40 @@ public class MyLevel extends Level {
 		length += buildStraight(0, width, true);
 
 		// create all of the medium sections
-		while (length < width - 64) {
-			// length += buildZone(length, width - length);
-			length += buildStraight(length, width - length, false);
-			length += buildStraight(length, width - length, false);
-			length += buildHillStraight(length, width - length);
-			length += buildJump(length, width - length);
-			length += buildTubes(length, width - length);
-			length += buildCannons(length, width - length);
-		}
+//		while (length < width - 64) {
+//			// length += buildZone(length, width - length);
+//			length += buildStraight(length, width - length, false);
+//			length += buildStraight(length, width - length, false);
+//			length += buildHillStraight(length, width - length);
+//			length += buildJump(length, width - length);
+//			length += buildTubes(length, width - length);
+//			length += buildCannons(length, width - length);
+//		}
 
+		buildEndPiece(length);
+
+//		if (type == LevelInterface.TYPE_CASTLE
+//				|| type == LevelInterface.TYPE_UNDERGROUND) {
+//			int ceiling = 0;
+//			int run = 0;
+//			for (int x = 0; x < width; x++) {
+//				if (run-- <= 0 && x > 4) {
+//					ceiling = random.nextInt(4);
+//					run = random.nextInt(4) + 4;
+//				}
+//				for (int y = 0; y < height; y++) {
+//					if ((x > 4 && y <= ceiling) || x < 1) {
+//						setBlock(x, y, GROUND);
+//					}
+//				}
+//			}
+//		}
+		
+		// finishing touches on level
+		fixWalls();
+	}
+
+	private void buildEndPiece(int length) {
 		// set the end piece
 		int floor = height - 1 - random.nextInt(4);
 
@@ -74,26 +116,6 @@ public class MyLevel extends Level {
 				}
 			}
 		}
-
-		if (type == LevelInterface.TYPE_CASTLE
-				|| type == LevelInterface.TYPE_UNDERGROUND) {
-			int ceiling = 0;
-			int run = 0;
-			for (int x = 0; x < width; x++) {
-				if (run-- <= 0 && x > 4) {
-					ceiling = random.nextInt(4);
-					run = random.nextInt(4) + 4;
-				}
-				for (int y = 0; y < height; y++) {
-					if ((x > 4 && y <= ceiling) || x < 1) {
-						setBlock(x, y, GROUND);
-					}
-				}
-			}
-		}
-
-		fixWalls();
-
 	}
 
 	private int buildJump(int xo, int maxLength) {
@@ -390,7 +412,7 @@ public class MyLevel extends Level {
 			}
 		}
 	}
-
+	
 	private void fixWalls() {
 		boolean[][] blockMap = new boolean[width + 1][height + 1];
 
