@@ -1,10 +1,11 @@
 package dk.itu.mario.level;
 
+import java.io.File;
 import java.lang.reflect.Field;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import dk.itu.mario.MarioInterface.Constraints;
 import dk.itu.mario.MarioInterface.GamePlay;
 import dk.itu.mario.MarioInterface.LevelInterface;
 import dk.itu.mario.engine.sprites.SpriteTemplate;
@@ -933,30 +934,6 @@ public class MyLevel extends Level {
 //					}
 //				}
 	}
-//
-//	private static int getBin(int value) {
-//		if (value <= 10) {
-//			return 0;
-//		} else if (value <= 20) {
-//			return 1;
-//		} else if (value <= 30) {
-//			return 2;
-//		} else if (value <= 40) {
-//			return 3;
-//		} else if (value <= 50) {
-//			return 4;
-//		} else if (value <= 60) {
-//			return 5;
-//		} else if (value <= 70) {
-//			return 6;
-//		} else if (value <= 80) {
-//			return 7;
-//		} else if (value <= 90) {
-//			return 8;
-//		} else {
-//			return 9;
-//		}
-//	}
 
 	private static double computeMean(double[] list) {
 		double sum = 0.0;
@@ -976,13 +953,34 @@ public class MyLevel extends Level {
 	
 	private static double[][][] parseEvidence() {
 		double[][][] result = new double[NUM_CLASSES][NUM_FEATURES][2];
-//		
-//		Path path = ".";
-//		System.out.println(path.getFileName());
-		// for each subfolder in players/ (in alpha order)
-			// List<metrics[]> metricsList
-			// for each file
-				// metricsList . add (file -> GamePlay -> parseMetrics)
+		
+		// open player data url
+		String rootDirectory = MyLevel.class.getClassLoader().getResource("./types/").getPath();
+		File root = new File(rootDirectory);
+		String[] subDirectories = root.list();
+
+		// for each class of player (type)
+		for (String subDirectory : subDirectories) {
+			// create a list of metrics from our resource data for that class
+			List<double[]> metrics = new ArrayList<double[]>();
+			
+			// add all the data to the metrics list
+			File directory = new File(rootDirectory + subDirectory);
+			String[] filenames = directory.list();
+			for (String filename : filenames) {
+				String resource = directory + File.separator + filename;
+				metrics.add(parseMetrics(GamePlay.read(resource)));
+			}
+			
+			// extract evidence from the metrics
+			System.out.println("CLASS: " + subDirectory);
+			for (double[] metric : metrics) {
+				for (double data : metric) {
+					System.out.print("" + data + ", ");
+				}
+				System.out.println();
+			}
+		}
 			// for each features
 				// result <- compute "mean" and "variance" across metrics[] in metricsList
 		
