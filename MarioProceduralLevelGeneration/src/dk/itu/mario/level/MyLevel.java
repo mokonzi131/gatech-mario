@@ -61,42 +61,131 @@ public class MyLevel extends Level {
 		lastSeed = seed;
 		random = new Random(seed);
 		
-		// create the start location
-		int length = 0;
-		length += buildStraight(0, width, true);
+		//get Player. RANDOM SELECT FOR NOW
+				int player=random.nextInt(4);
 
-		// create all of the medium sections
-//		while (length < width - 64) {
-//			// length += buildZone(length, width - length);
-			length += buildStraight(length, width - length, false);
-			length += buildStraight(length, width - length, false);
-			length += buildHillStraight(length, width - length);
-//			length += buildJump(length, width - length);
-//			length += buildTubes(length, width - length);
-//			length += buildCannons(length, width - length);
-//		}
+			        //create the start location
+			        int length = 0;
+			        length += buildStraight(0, width, true);
 
-		buildEndPiece(length);
+				int startLength=length;
+				int cliffHeight=10;
+			        //create all of the medium sections
+			        while (length < width - 64)
+			        {
+			            //length += buildZone(length, width - length);
+						if(player==0){
+						//assassin
+							length +=buildEnemyDitch(length,width-length);
+							length +=buildJump(length,width-length);
+						        length += buildStraight(length, width-length, false);
+							length += buildHillStraight(length, width-length);
+						}
+						else if(player==2){
+						//racer
+							length += buildCliff(length,width-length,cliffHeight);
+							cliffHeight=cliffHeight-random.nextInt(2);
+							if(cliffHeight<2){
+							 cliffHeight=2;
+							}
+						}
+						else if(player==1){
+						//coin collector
+							length +=buildCoinCage(length,width-length);
+							length += buildHillStraight(length, width-length);
+							length +=buildCoinWall(length,width-length);
+							length += buildHillStraight(length, width-length);
+						}
+						else{
+						//explorer=3
+						     //length += buildTubes(length, width-length);
+							length += buildStraight(length, width-length, false);
+							length += buildHillStraight(length, width-length);
+							//length += buildJump(length, width-length);
+						}
+					
+			        }
 
-//		if (type == LevelInterface.TYPE_CASTLE
-//				|| type == LevelInterface.TYPE_UNDERGROUND) {
-//			int ceiling = 0;
-//			int run = 0;
-//			for (int x = 0; x < width; x++) {
-//				if (run-- <= 0 && x > 4) {
-//					ceiling = random.nextInt(4);
-//					run = random.nextInt(4) + 4;
-//				}
-//				for (int y = 0; y < height; y++) {
-//					if ((x > 4 && y <= ceiling) || x < 1) {
-//						setBlock(x, y, GROUND);
-//					}
-//				}
-//			}
-//		}
-		
-		// finishing touches on level
-		fixWalls();
+				
+				
+				int brickLength=14;
+				//free powerup
+				setBlock(5, height - 5, BLOCK_POWERUP);
+			          BLOCKS_POWER++;
+
+				//staircase if explorer
+				if(player==3){
+					setBlock(startLength-1, height - 6, BLOCK_EMPTY);
+			                    BLOCKS_EMPTY++;
+				}
+				if(player==2){
+				//staircase for racer
+					setBlock(startLength-4, height - 6, BLOCK_POWERUP);
+			                    BLOCKS_POWER++;
+
+					setBlock(startLength-2, height - 8, BLOCK_POWERUP);
+			                    BLOCKS_POWER++;
+				}
+				//floating objects
+				while(brickLength < width - 64){
+					if(player==0){
+						//assassin
+					brickLength +=buildGoombaWaterfall(brickLength,width-brickLength,10);
+					}
+					else if(player==1){
+						//coin collector
+					brickLength +=buildCoinBox(brickLength,width-brickLength,7);
+					}
+					else if(player==3){
+						//explorer
+						brickLength +=buildBrickCeiling(brickLength,width-brickLength,8);
+						brickLength +=buildRoom(brickLength,width-brickLength,6);
+					}
+					else{
+					brickLength++;
+					}
+				}
+
+			        //set the end piece
+			        int floor = height - 1 - random.nextInt(4);
+
+			        xExit = length + 8;
+			        yExit = floor;
+
+			        // fills the end piece
+			        for (int x = length; x < width; x++)
+			        {
+			            for (int y = 0; y < height; y++)
+			            {
+			                if (y >= floor)
+			                {
+			                    setBlock(x, y, GROUND);
+			                }
+			            }
+			        }
+
+			        if (type == LevelInterface.TYPE_CASTLE || type == LevelInterface.TYPE_UNDERGROUND)
+			        {
+			            int ceiling = 0;
+			            int run = 0;
+			            for (int x = 0; x < width; x++)
+			            {
+			                if (run-- <= 0 && x > 4)
+			                {
+			                    ceiling = random.nextInt(4);
+			                    run = random.nextInt(4) + 4;
+			                }
+			                for (int y = 0; y < height; y++)
+			                {
+			                    if ((x > 4 && y <= ceiling) || x < 1)
+			                    {
+			                        setBlock(x, y, GROUND);
+			                    }
+			                }
+			            }
+			        }
+
+			        fixWalls();
 	}
 
 	private void buildEndPiece(int length) {
@@ -547,20 +636,53 @@ public class MyLevel extends Level {
 
 	}
 
-	private int buildBrickCeiling(int xo, int maxLength, int brickHeight) {
+	private int buildCliff(int xo, int maxLength, int cliffHeight){
 		int length = random.nextInt(10) + 2;
 
-		if (length > maxLength)
-			length = maxLength;
-		int floor = height - 1;
-		for (int x = xo; x < xo + length; x++) {
-			setBlock(x, floor - brickHeight, BLOCK_EMPTY);
-			BLOCKS_EMPTY++;
-		}
-		//
+       
+        	if (length > maxLength)
+        		length = maxLength;
+
+        	int floor = height-cliffHeight;
+
+        //runs from the specified x position to the length of the segment
+        for (int x = xo; x < xo + length; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
 		return length;
 	}
-///
+
+	private int buildRoom(int xo, int maxLength, int brickHeight){
+		int length = random.nextInt(8) + 2;
+		int boxHeight=random.nextInt(2)+3;
+
+        	if (length > maxLength)
+        	length = maxLength;
+	 	int floor = height - 1;
+
+		for(int i=xo; i<xo+length; i++){
+			for(int j=floor-brickHeight-boxHeight; j<=floor-brickHeight; j++){
+				if(j==floor-brickHeight || j==floor-brickHeight-boxHeight||i==xo||i==xo+length-1){
+				setBlock(i,j,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
+				}
+				
+			}
+		}
+
+		setBlock(xo+(int)(length/2), floor-brickHeight-(int)(boxHeight/2), BLOCK_POWERUP);
+          	BLOCKS_POWER++;
+
+		return length;
+	}
+	
 	private int buildCoinBox(int xo, int maxLength, int brickHeight){
 		int length = random.nextInt(10) + 2;
 		int boxHeight=random.nextInt(10)+3;
@@ -583,128 +705,177 @@ public class MyLevel extends Level {
 		}
 		return length;
 	}
+
+	private int buildCoinWall(int xo, int maxLength){
+		int length = random.nextInt(10) + 2;
+
+        	if (length > maxLength)
+        	length = maxLength;
+	 	int floor = height - 1;
+
+		int coinHeight=random.nextInt(10)+2;
+		for(int x=xo; x<xo+length;x++){
+			for(int y=0; y<coinHeight; y++){
+				if(y==0){
+				setBlock(x,floor-y-1,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
+				}
+				else{
+				setBlock(x,floor-y-1,COIN);
+				COINS++;
+				}
+				
+			}
+		}
+		return length;
+	}
 	
-	private int buildCoinWall(int xo, int maxLength) {
+	private int buildCoinCage(int xo, int maxLength){
 		int length = random.nextInt(10) + 2;
 
-		if (length > maxLength)
-			length = maxLength;
-		int floor = height - 1;
+        	if (length > maxLength)
+        	length = maxLength;
+	 	int floor = height - 1;
 
-		int coinHeight = random.nextInt(10) + 2;
-		for (int x = xo; x < xo + length; x++) {
-			for (int y = 0; y < coinHeight; y++) {
-				if (y == 0) {
-					setBlock(x, floor - y - 1, BLOCK_EMPTY);
-					BLOCKS_EMPTY++;
-				} else {
-					setBlock(x, floor - y - 1, COIN);
-					COINS++;
-				}
-
-			}
-		}
-		return length;
-	}
-
-	private int buildCoinCage(int xo, int maxLength) {
-		int length = random.nextInt(10) + 2;
-
-		if (length > maxLength)
-			length = maxLength;
-		int floor = height - 1;
-
-		for (int i = 0; i < 4; i++) {
-			setBlock(xo, floor - i - 1, BLOCK_EMPTY);
+		for(int i=0; i<4; i++){
+			setBlock(xo,floor-i-1,BLOCK_EMPTY);
 			BLOCKS_EMPTY++;
 		}
 
-		for (int i = xo + 1; i < xo + length - 1; i++) {
-			for (int y = 0; y < 4; y++) {
-				if (y == 0) {
-					setBlock(i, floor - y - 1, BLOCK_EMPTY);
-					BLOCKS_EMPTY++;
-				} else {
-					setBlock(i, floor - y - 1, COIN);
-					COINS++;
+		for(int i=xo+1; i<xo+length-1;i++){
+			for(int y=0; y<4; y++){
+				if(y==0){
+				setBlock(i,floor-y-1,BLOCK_EMPTY);
+				BLOCKS_EMPTY++;
 				}
+				else{
+				setBlock(i,floor-y-1,COIN);
+				COINS++;
+				}	
 			}
 		}
 
-		for (int i = 0; i < 4; i++) {
-			setBlock(xo + length - 1, floor - i - 1, BLOCK_EMPTY);
+		for(int i=0; i<4; i++){
+			setBlock(xo+length-1,floor-i-1,BLOCK_EMPTY);
 			BLOCKS_EMPTY++;
 		}
 
 		return length;
 	}
 
-	private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight) {
-		int length = 20;
+	
 
-		if (length > maxLength)
-			length = maxLength;
+	private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight){
+		int length=20;
 
-		int floor = height - 1;
-		for (int x = xo; x < xo + length; x++) {
-			setBlock(x, floor - brickHeight, BLOCK_EMPTY);
-			BLOCKS_EMPTY++;
+		if(length>maxLength)
+			length=maxLength;
+
+		 int floor = height - 1;	
+		for (int x = xo; x < xo + length-1; x++)
+        	{
+		setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+                    BLOCKS_EMPTY++;
 		}
 
-		setBlock(xo + length - 1, floor - brickHeight - 1, BLOCK_EMPTY);
+		setBlock(xo+length-2,floor-brickHeight-1,BLOCK_EMPTY);
 		BLOCKS_EMPTY++;
 
-		for (int x = xo + 1; x < xo + length - 1; x++) {
-			type = Enemy.ENEMY_GOOMBA;
-			setSpriteTemplate(x, floor - brickHeight - 1, new SpriteTemplate(
-					type, false));
-			ENEMIES++;
-		}
+		for (int x = xo+1; x < xo+length-2; x++)
+        	{
+                type = Enemy.ENEMY_GOOMBA;
+                setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,false));
+                ENEMIES++;
+        	}
 
 		return length;
 	}
 
-	private int buildEnemyDitch(int xo, int maxLength) {
-		int length = random.nextInt(10) + 2;
+	private int buildBrickCeiling(int xo, int maxLength, int brickHeight)
+    	{
+        int length = random.nextInt(10) + 2;
 
-		if (length > maxLength)
-			length = maxLength;
-
-		int floor = height - 1 - random.nextInt(4);
-
-		// runs from the specified x position to the length of the segment
-		for (int y = 0; y < height; y++) {
-			if (y >= floor - 1) {
-				setBlock(xo, y, BLOCK_EMPTY);
-				BLOCKS_EMPTY++;
-			}
+        if (length > maxLength)
+        	length = maxLength;
+	 int floor = height - 1;	
+	for (int x = xo; x < xo + length; x++)
+        	{
+		setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+                    BLOCKS_EMPTY++;
 		}
 
-		for (int x = xo + 1; x < xo + length - 1; x++) {
-			for (int y = 0; y < height; y++) {
-				if (y >= floor) {
-					setBlock(x, y, GROUND);
-				}
-			}
+	 int randY=random.nextInt(2);
+		setBlock(xo+random.nextInt(length), floor-brickHeight-5+randY, BLOCK_POWERUP);
+          BLOCKS_POWER++;
+		setBlock(xo+random.nextInt(length), floor-brickHeight-5+randY, BLOCK_COIN);
+          BLOCKS_POWER++;
+	
+		randY=random.nextInt(2);
+		for(int x=0; x<3; x++){
+			setBlock(xo+random.nextInt(length), floor-brickHeight-5+randY, COIN);
+          		COINS++;
 		}
-
-		for (int y = 0; y < height; y++) {
-			if (y >= floor - 1) {
-				setBlock(xo + length - 1, y, BLOCK_EMPTY);
-				BLOCKS_EMPTY++;
-			}
+		
+		if(Math.random()<.2){
+		type = Enemy.ENEMY_GREEN_KOOPA;
+                setSpriteTemplate(xo, floor-brickHeight-1, new SpriteTemplate(type,false));
 		}
-
-		// Place enemies:
-
-		for (int x = xo + 1; x < xo + length - 1; x++) {
-			type = Enemy.ENEMY_GOOMBA;
-			setSpriteTemplate(x, floor - 1, new SpriteTemplate(type, false));
-			ENEMIES++;
-		}
-
+		
 		return length;
 	}
+
+	private int buildEnemyDitch(int xo, int maxLength)
+    {
+        int length = random.nextInt(10) + 2;
+
+        if (length > maxLength)
+        	length = maxLength;
+
+        int floor = height - 1 - random.nextInt(4);
+
+        //runs from the specified x position to the length of the segment
+	for (int y = 0; y < height; y++)
+            {
+                if (y >= floor-1)
+                {
+                    setBlock(xo, y, BLOCK_EMPTY);
+			BLOCKS_EMPTY++;
+                }
+            }
+
+        for (int x = xo+1; x < xo + length-1; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (y >= floor)
+                {
+                    setBlock(x, y, GROUND);
+                }
+            }
+        }
+
+	for (int y = 0; y < height; y++)
+            {
+                if (y >= floor-1)
+                {
+                    setBlock(xo+length-1, y, BLOCK_EMPTY);
+			BLOCKS_EMPTY++;
+                }
+            }
+
+	//Place enemies:
+	
+	for (int x = xo+1; x < xo+length-1; x++)
+        {
+                type = Enemy.ENEMY_GOOMBA;
+                setSpriteTemplate(x, floor-1, new SpriteTemplate(type,false));
+                ENEMIES++;
+        }
+
+   
+
+        return length;
+    }
 
 	// Player classification //
 	private static final int NUM_CLASSES = PLAYER_CLASS.values().length;
