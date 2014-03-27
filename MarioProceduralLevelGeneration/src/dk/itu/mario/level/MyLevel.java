@@ -55,7 +55,7 @@ public class MyLevel extends Level {
 		return PLAYER_CLASS.BEGINNER;
 	}
 
-	public void creat(long seed, int difficulty, int type, PLAYER_CLAS playerType) {
+	public void creat(long seed, int difficulty, int type, PLAYER_CLASS playerType) {
 
 		this.type = type;
 		this.difficulty = difficulty;
