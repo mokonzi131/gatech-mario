@@ -60,42 +60,131 @@ public class MyLevel extends Level {
 		lastSeed = seed;
 		random = new Random(seed);
 		
-		// create the start location
-		int length = 0;
-		length += buildStraight(0, width, true);
+		//get Player. RANDOM SELECT FOR NOW
+				int player=random.nextInt(4);
 
-		// create all of the medium sections
-//		while (length < width - 64) {
-//			// length += buildZone(length, width - length);
-			length += buildStraight(length, width - length, false);
-			length += buildStraight(length, width - length, false);
-			length += buildHillStraight(length, width - length);
-//			length += buildJump(length, width - length);
-//			length += buildTubes(length, width - length);
-//			length += buildCannons(length, width - length);
-//		}
+			        //create the start location
+			        int length = 0;
+			        length += buildStraight(0, width, true);
 
-		buildEndPiece(length);
+				int startLength=length;
+				int cliffHeight=10;
+			        //create all of the medium sections
+			        while (length < width - 64)
+			        {
+			            //length += buildZone(length, width - length);
+						if(player==0){
+						//assassin
+							length +=buildEnemyDitch(length,width-length);
+							length +=buildJump(length,width-length);
+						        length += buildStraight(length, width-length, false);
+							length += buildHillStraight(length, width-length);
+						}
+						else if(player==2){
+						//racer
+							length += buildCliff(length,width-length,cliffHeight);
+							cliffHeight=cliffHeight-random.nextInt(2);
+							if(cliffHeight<2){
+							 cliffHeight=2;
+							}
+						}
+						else if(player==1){
+						//coin collector
+							length +=buildCoinCage(length,width-length);
+							length += buildHillStraight(length, width-length);
+							length +=buildCoinWall(length,width-length);
+							length += buildHillStraight(length, width-length);
+						}
+						else{
+						//explorer=3
+						     //length += buildTubes(length, width-length);
+							length += buildStraight(length, width-length, false);
+							length += buildHillStraight(length, width-length);
+							//length += buildJump(length, width-length);
+						}
+					
+			        }
 
-//		if (type == LevelInterface.TYPE_CASTLE
-//				|| type == LevelInterface.TYPE_UNDERGROUND) {
-//			int ceiling = 0;
-//			int run = 0;
-//			for (int x = 0; x < width; x++) {
-//				if (run-- <= 0 && x > 4) {
-//					ceiling = random.nextInt(4);
-//					run = random.nextInt(4) + 4;
-//				}
-//				for (int y = 0; y < height; y++) {
-//					if ((x > 4 && y <= ceiling) || x < 1) {
-//						setBlock(x, y, GROUND);
-//					}
-//				}
-//			}
-//		}
-		
-		// finishing touches on level
-		fixWalls();
+				
+				
+				int brickLength=14;
+				//free powerup
+				setBlock(5, height - 5, BLOCK_POWERUP);
+			          BLOCKS_POWER++;
+
+				//staircase if explorer
+				if(player==3){
+					setBlock(startLength-1, height - 6, BLOCK_EMPTY);
+			                    BLOCKS_EMPTY++;
+				}
+				if(player==2){
+				//staircase for racer
+					setBlock(startLength-4, height - 6, BLOCK_POWERUP);
+			                    BLOCKS_POWER++;
+
+					setBlock(startLength-2, height - 8, BLOCK_POWERUP);
+			                    BLOCKS_POWER++;
+				}
+				//floating objects
+				while(brickLength < width - 64){
+					if(player==0){
+						//assassin
+					brickLength +=buildGoombaWaterfall(brickLength,width-brickLength,10);
+					}
+					else if(player==1){
+						//coin collector
+					brickLength +=buildCoinBox(brickLength,width-brickLength,7);
+					}
+					else if(player==3){
+						//explorer
+						brickLength +=buildBrickCeiling(brickLength,width-brickLength,8);
+						brickLength +=buildRoom(brickLength,width-brickLength,6);
+					}
+					else{
+					brickLength++;
+					}
+				}
+
+			        //set the end piece
+			        int floor = height - 1 - random.nextInt(4);
+
+			        xExit = length + 8;
+			        yExit = floor;
+
+			        // fills the end piece
+			        for (int x = length; x < width; x++)
+			        {
+			            for (int y = 0; y < height; y++)
+			            {
+			                if (y >= floor)
+			                {
+			                    setBlock(x, y, GROUND);
+			                }
+			            }
+			        }
+
+			        if (type == LevelInterface.TYPE_CASTLE || type == LevelInterface.TYPE_UNDERGROUND)
+			        {
+			            int ceiling = 0;
+			            int run = 0;
+			            for (int x = 0; x < width; x++)
+			            {
+			                if (run-- <= 0 && x > 4)
+			                {
+			                    ceiling = random.nextInt(4);
+			                    run = random.nextInt(4) + 4;
+			                }
+			                for (int y = 0; y < height; y++)
+			                {
+			                    if ((x > 4 && y <= ceiling) || x < 1)
+			                    {
+			                        setBlock(x, y, GROUND);
+			                    }
+			                }
+			            }
+			        }
+
+			        fixWalls();
 	}
 
 	private void buildEndPiece(int length) {
