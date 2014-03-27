@@ -1,6 +1,7 @@
 package dk.itu.mario.level;
 
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.util.Random;
 
 import dk.itu.mario.MarioInterface.Constraints;
@@ -705,32 +706,35 @@ public class MyLevel extends Level {
 		return length;
 	}
 
-	
+	// Player classification //
+	private static final int NUM_CLASSES = PLAYER_CLASS.values().length;
+	private static final int NUM_FEATURES = GamePlay.class.getFields().length;
 	private static PLAYER_CLASS determinePlayerClass(GamePlay gameplay) {
+		// array representing our current player's metrics
 		double[] metrics = parseMetrics(gameplay);
-		System.out.println(metrics);
 		
+		// array representing evidence data (as determined from our previous players)
+		double[][][] evidence = parseEvidence();
+//		double[][][] conditionalProbability =
+//				new double[metrics.length][NUM_BINS][NUM_CLASSES];
+		// TODO
+		// values assigned to this array will be pasted here later after they're
+		// computed from data.
+		
+		// array maintaining probabilities of belonging to a certain class
+		// 0=assassin, 1=beginner, 2=collector, 3=racer (to match conditional array above)
+		double[] playerClass = new double[NUM_CLASSES];
+		
+		// compute probability of belonging to the classes
+		for (int c = 0; c < NUM_CLASSES; ++c) {
+			
+		}
+		
+		// find the class with the max probability
+		
+		// convert to result and return
 		return PLAYER_CLASS.BEGINNER;
-		
-//		// convert metrics to an array so it is easy to work with
-//				int[] metrics = convertMetrics(playerMetrics);
-//
-//				int numFeatures = 50;// how many metrics
-//				int numBins = 10;// number of bins
-//				int numClasses = 4;
-//				double[][][] conditionalProbability = new double[numFeatures][numBins][numClasses];
-//				// TODO
-//				// values assigned to this array will be pasted here later after theyre
-//				// computed from data.
-//
-//				// compute P(observation and class)
-//				// assassin=0, coin collector=1, racer=2, explorer=3
-//
-//				// compute probability of assassin:
-//				double[] pClass = new double[4];
-//
 //				for (int c = 0; c < numClasses; c++) {// loop through each class
-//
 //					for (int i = 0; i < numFeatures; i++) {
 //						pClass[c] = pClass[c]
 //								* conditionalProbability[i][getBin(metrics[i])][0];
@@ -746,8 +750,7 @@ public class MyLevel extends Level {
 //						pData = pData + probability;
 //					}
 //					pClass[c] = pClass[c] / pData;
-//
-//				}// end of class loop
+////				}// end of class loop
 //
 //				// get class with maximum posterior probability
 //				double max = Double.NEGATIVE_INFINITY;
@@ -758,37 +761,66 @@ public class MyLevel extends Level {
 //						max = pClass[i];
 //					}
 //				}
+	}
 //
-//				return bestClass;
-	}
+//	private static int getBin(int value) {
+//		if (value <= 10) {
+//			return 0;
+//		} else if (value <= 20) {
+//			return 1;
+//		} else if (value <= 30) {
+//			return 2;
+//		} else if (value <= 40) {
+//			return 3;
+//		} else if (value <= 50) {
+//			return 4;
+//		} else if (value <= 60) {
+//			return 5;
+//		} else if (value <= 70) {
+//			return 6;
+//		} else if (value <= 80) {
+//			return 7;
+//		} else if (value <= 90) {
+//			return 8;
+//		} else {
+//			return 9;
+//		}
+//	}
 
-	private static int getBin(int value) {
-		if (value <= 10) {
-			return 0;
-		} else if (value <= 20) {
-			return 1;
-		} else if (value <= 30) {
-			return 2;
-		} else if (value <= 40) {
-			return 3;
-		} else if (value <= 50) {
-			return 4;
-		} else if (value <= 60) {
-			return 5;
-		} else if (value <= 70) {
-			return 6;
-		} else if (value <= 80) {
-			return 7;
-		} else if (value <= 90) {
-			return 8;
-		} else {
-			return 9;
+	private static double computeMean(double[] list) {
+		double sum = 0.0;
+		for (int i = 0; i < list.length; ++i) {
+			sum += list[i];
 		}
+		return (sum / list.length);
 	}
-
+	
+	private static double computeVariance(double[] list, double mean) {
+		double sum = 0.0;
+		for (int i = 0; i < list.length; ++i) {
+			sum += Math.pow((list[i] - mean), 2);
+		}
+		return (sum / list.length);
+	}
+	
+	private static double[][][] parseEvidence() {
+		double[][][] result = new double[NUM_CLASSES][NUM_FEATURES][2];
+//		
+//		Path path = ".";
+//		System.out.println(path.getFileName());
+		// for each subfolder in players/ (in alpha order)
+			// List<metrics[]> metricsList
+			// for each file
+				// metricsList . add (file -> GamePlay -> parseMetrics)
+			// for each features
+				// result <- compute "mean" and "variance" across metrics[] in metricsList
+		
+		return result;
+	}
+	
 	private static double[] parseMetrics(GamePlay gameplay) {
 		Field[] fields = GamePlay.class.getFields();
-		double[] metrics = new double[fields.length];
+		double[] metrics = new double[NUM_FEATURES];
 		for (int i = 0; i < fields.length; ++i) {
 			try {
 				metrics[i] = fields[i].getDouble(gameplay);
@@ -798,11 +830,6 @@ public class MyLevel extends Level {
 				//e.printStackTrace();
 			}
 		}
-		
-		for (int i = 0; i < fields.length; ++i) {
-			System.out.println("" + fields[i].getName() + "\t\t" + metrics[i]);
-		}
-		
 		return metrics;
 	}
 }
