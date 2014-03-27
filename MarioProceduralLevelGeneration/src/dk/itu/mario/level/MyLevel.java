@@ -13,8 +13,8 @@ import dk.itu.mario.engine.sprites.Enemy;
 
 public class MyLevel extends Level {
 	private static enum PLAYER_CLASS {
-		BEGINNER,
 		ASSASSIN,
+		BEGINNER,
 		COLLECTOR,
 		RACER
 	}
@@ -887,6 +887,13 @@ public class MyLevel extends Level {
 		
 		// array representing evidence data (as determined from our previous players)
 		double[][][] evidence = parseEvidence();
+		for (int i = 0; i < NUM_CLASSES; ++i) {
+			System.out.println(MyLevel.PLAYER_CLASS.values()[i]);
+			for (int j = 0; j < NUM_FEATURES; ++j) {
+				System.out.println(evidence[i][j][0] + ", " + evidence[i][j][1]);
+			}
+		}
+		
 //		double[][][] conditionalProbability =
 //				new double[metrics.length][NUM_BINS][NUM_CLASSES];
 		// TODO
@@ -934,7 +941,46 @@ public class MyLevel extends Level {
 //					}
 //				}
 	}
+	
+	private static double[][][] parseEvidence() {
+		double[][][] result = new double[NUM_CLASSES][NUM_FEATURES][2];
+		
+		// open player data url
+		String rootDirectory = MyLevel.class.getClassLoader().getResource("./types/").getPath();
+		File root = new File(rootDirectory);
+		String[] subDirectories = root.list();
 
+		// for each class of player (type)
+		int currentClass = 0;
+		for (String subDirectory : subDirectories) {
+			// add all the data to the metrics list
+			File directory = new File(rootDirectory + subDirectory);
+			String[] filenames = directory.list();
+			
+			// create an array of metrics from our resource data for that class
+			double[][] metrics = new double[NUM_FEATURES][filenames.length];
+			int currentFile = 0;
+			for (String filename : filenames) {
+				String resource = directory + File.separator + filename;
+				double[] metric = parseMetrics(GamePlay.read(resource));
+				for (int i = 0; i < metric.length; ++i) {
+					metrics[i][currentFile] = metric[i];
+				}
+				++currentFile;
+			}
+			
+			// extract evidence from the metrics
+			for (int feature = 0; feature < NUM_FEATURES; ++feature) {
+				result[currentClass][feature][0] = computeMean(metrics[feature]);
+				result[currentClass][feature][1] = computeVariance(metrics[feature], result[currentClass][feature][0]);
+			}
+			
+			++currentClass;
+		}
+		
+		return result;
+	}
+	
 	private static double computeMean(double[] list) {
 		double sum = 0.0;
 		for (int i = 0; i < list.length; ++i) {
@@ -949,42 +995,6 @@ public class MyLevel extends Level {
 			sum += Math.pow((list[i] - mean), 2);
 		}
 		return (sum / list.length);
-	}
-	
-	private static double[][][] parseEvidence() {
-		double[][][] result = new double[NUM_CLASSES][NUM_FEATURES][2];
-		
-		// open player data url
-		String rootDirectory = MyLevel.class.getClassLoader().getResource("./types/").getPath();
-		File root = new File(rootDirectory);
-		String[] subDirectories = root.list();
-
-		// for each class of player (type)
-		for (String subDirectory : subDirectories) {
-			// create a list of metrics from our resource data for that class
-			List<double[]> metrics = new ArrayList<double[]>();
-			
-			// add all the data to the metrics list
-			File directory = new File(rootDirectory + subDirectory);
-			String[] filenames = directory.list();
-			for (String filename : filenames) {
-				String resource = directory + File.separator + filename;
-				metrics.add(parseMetrics(GamePlay.read(resource)));
-			}
-			
-			// extract evidence from the metrics
-			System.out.println("CLASS: " + subDirectory);
-			for (double[] metric : metrics) {
-				for (double data : metric) {
-					System.out.print("" + data + ", ");
-				}
-				System.out.println();
-			}
-		}
-			// for each features
-				// result <- compute "mean" and "variance" across metrics[] in metricsList
-		
-		return result;
 	}
 	
 	private static double[] parseMetrics(GamePlay gameplay) {
