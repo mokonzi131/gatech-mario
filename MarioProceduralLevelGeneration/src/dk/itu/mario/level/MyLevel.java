@@ -887,59 +887,53 @@ public class MyLevel extends Level {
 		
 		// array representing evidence data (as determined from our previous players)
 		double[][][] evidence = parseEvidence();
-		for (int i = 0; i < NUM_CLASSES; ++i) {
-			System.out.println(MyLevel.PLAYER_CLASS.values()[i]);
-			for (int j = 0; j < NUM_FEATURES; ++j) {
-				System.out.println(evidence[i][j][0] + ", " + evidence[i][j][1]);
+		
+		// compute probability of belonging to the classes
+		double[] probabilities = new double[NUM_CLASSES];
+		for (int c = 0; c < NUM_CLASSES; ++c) {
+			probabilities[c] = 1000.0;
+			
+			// naive bayes
+			// apply likelihoods P(e | o)
+			// we can ignore P(o) because we are not matching the player over time
+			// we can ignore P(e*) because it is the same for each class
+			for (int f = 0; f < NUM_FEATURES; ++f) {
+				double value = likelihood(metrics[f], evidence[c][f][0], evidence[c][f][1]);
+				probabilities[c] *= value;
 			}
 		}
 		
-//		double[][][] conditionalProbability =
-//				new double[metrics.length][NUM_BINS][NUM_CLASSES];
-		// TODO
-		// values assigned to this array will be pasted here later after they're
-		// computed from data.
-		
-		// array maintaining probabilities of belonging to a certain class
-		// 0=assassin, 1=beginner, 2=collector, 3=racer (to match conditional array above)
-		double[] playerClass = new double[NUM_CLASSES];
-		
-		// compute probability of belonging to the classes
-		for (int c = 0; c < NUM_CLASSES; ++c) {
-			
+		// find the class with the max probability
+		int maximum = 0;
+		for (int i = 0; i < NUM_CLASSES; ++i) {
+			System.out.println("CLASS: " + i + " : " + probabilities[i]);
+			if (probabilities[i] > probabilities[maximum])
+				maximum = i;
 		}
 		
-		// find the class with the max probability
-		
-		// convert to result and return
-		return PLAYER_CLASS.BEGINNER;
-//				for (int c = 0; c < numClasses; c++) {// loop through each class
-//					for (int i = 0; i < numFeatures; i++) {
-//						pClass[c] = pClass[c]
-//								* conditionalProbability[i][getBin(metrics[i])][0];
-//					}
-//
-//					double pData = 0.0;
-//					for (int i = 0; i < numClasses; i++) {
-//						double probability = 1.0;
-//						for (int j = 0; j < numFeatures; j++) {
-//							probability = probability
-//									* conditionalProbability[j][getBin(metrics[j])][i];
-//						}
-//						pData = pData + probability;
-//					}
-//					pClass[c] = pClass[c] / pData;
-////				}// end of class loop
-//
-//				// get class with maximum posterior probability
-//				double max = Double.NEGATIVE_INFINITY;
-//				int bestClass = 0;
-//				for (int i = 0; i < numClasses; i++) {
-//					if (pClass[i] > max) {
-//						bestClass = i;
-//						max = pClass[i];
-//					}
-//				}
+		// return classification
+		switch(maximum) {
+		case 0:
+			return PLAYER_CLASS.ASSASSIN;
+		case 1:
+			return PLAYER_CLASS.BEGINNER;
+		case 2:
+			return PLAYER_CLASS.COLLECTOR;
+		case 3:
+			return PLAYER_CLASS.RACER;
+		default:
+			return PLAYER_CLASS.BEGINNER;
+		}
+	}
+	
+	private static double likelihood(double x, double mean, double variance) {
+		double exponent = -1.0 * Math.pow((x - mean), 2) / (2.0 * variance);
+		double term = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
+		double result = term * Math.exp(exponent);
+		// not correct, but ignores data that has no influence on result
+		if (Double.isNaN(result)) result = 1.0;
+		if (result == 0.0) result = 0.000001; 
+		return result;
 	}
 	
 	private static double[][][] parseEvidence() {
