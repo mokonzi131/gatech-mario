@@ -62,8 +62,11 @@ public class MyLevel extends Level {
 		lastSeed = seed;
 		random = new Random(seed);
 		
+		double randomFlavor=Math.random();
+
 		//get Player. RANDOM SELECT FOR NOW
 				int player=random.nextInt(4);
+				
 
 			        //create the start location
 			        int length = 0;
@@ -84,10 +87,16 @@ public class MyLevel extends Level {
 						}
 						else if(player==2){
 						//racer
-							length += buildCliff(length,width-length,cliffHeight);
-							cliffHeight=cliffHeight-random.nextInt(2);
-							if(cliffHeight<2){
-							 cliffHeight=2;
+							if(randomFlavor<.5){
+								length += buildCliff(length,width-length,cliffHeight);
+								cliffHeight=cliffHeight-random.nextInt(2);
+								if(cliffHeight<2){
+							 	cliffHeight=2;
+								}
+							}
+							else{
+								length += buildCliff(length,width-length,3);
+								
 							}
 						}
 						else if(player==1){
@@ -113,6 +122,14 @@ public class MyLevel extends Level {
 				//free powerup
 				setBlock(5, height - 5, BLOCK_POWERUP);
 			          BLOCKS_POWER++;
+				setBlock(4, height - 5, BLOCK_POWERUP);
+			          BLOCKS_POWER++;
+
+				setBlock(5, height - 8, BLOCK_POWERUP);
+			          BLOCKS_POWER++;
+				setBlock(4, height - 8, BLOCK_POWERUP);
+			          BLOCKS_POWER++;		
+				
 
 				//staircase if explorer
 				if(player==3){
@@ -131,19 +148,33 @@ public class MyLevel extends Level {
 				while(brickLength < width - 64){
 					if(player==0){
 						//assassin
-					brickLength +=buildGoombaWaterfall(brickLength,width-brickLength,10);
+					brickLength +=buildGoombaWaterfall(brickLength,width-brickLength,10,randomFlavor);
 					}
 					else if(player==1){
 						//coin collector
-					brickLength +=buildCoinBox(brickLength,width-brickLength,7);
+					brickLength +=buildCoinBox(brickLength,width-brickLength,7,randomFlavor);
 					}
 					else if(player==3){
 						//explorer
+						if(randomFlavor<.5){
 						brickLength +=buildBrickCeiling(brickLength,width-brickLength,8);
 						brickLength +=buildRoom(brickLength,width-brickLength,6);
+						}
+						else{
+						int oldBrickLength=brickLength;
+						brickLength +=buildBrickCeiling(brickLength+random.nextInt(3),width-brickLength,random.nextInt(9)+5);
+						brickLength +=buildBrickCeiling(oldBrickLength+random.nextInt(3),width-oldBrickLength,random.nextInt(8)+5);
+						}
 					}
-					else{
-					brickLength++;
+					else{ //racer
+						if(randomFlavor<.5){
+						brickLength +=buildBrickCeiling(brickLength,width-brickLength,10);
+					        brickLength = brickLength + random.nextInt(10);
+						}
+						else{
+						brickLength +=buildBrickCeiling(brickLength,width-brickLength,5);
+					        brickLength = brickLength + random.nextInt(10);
+						}
 					}
 				}
 
@@ -684,7 +715,7 @@ public class MyLevel extends Level {
 		return length;
 	}
 	
-	private int buildCoinBox(int xo, int maxLength, int brickHeight){
+	private int buildCoinBox(int xo, int maxLength, int brickHeight, double rand){
 		int length = random.nextInt(10) + 2;
 		int boxHeight=random.nextInt(10)+3;
 
@@ -695,8 +726,24 @@ public class MyLevel extends Level {
 		for(int i=xo; i<xo+length; i++){
 			for(int j=floor-brickHeight-boxHeight; j<=floor-brickHeight; j++){
 				if(j==floor-brickHeight || j==floor-brickHeight-boxHeight||i==xo||i==xo+length-1){
-				setBlock(i,j,BLOCK_EMPTY);
-				BLOCKS_EMPTY++;
+					if(rand<.333){
+					setBlock(i,j,BLOCK_EMPTY);
+					BLOCKS_EMPTY++;
+					}
+					else if(rand<.666){
+						if(i!=xo+length/2){
+						setBlock(i,j,BLOCK_COIN);
+						BLOCKS_EMPTY++;
+						}
+						else{
+							setBlock(i,j,BLOCK_EMPTY);
+							BLOCKS_EMPTY++;
+						}
+					}
+					else{
+						setBlock(i,j,COIN);
+						COINS++;
+					}
 				}
 				else{
 				setBlock(i,j,COIN);
@@ -766,7 +813,7 @@ public class MyLevel extends Level {
 
 	
 
-	private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight){
+	private int buildGoombaWaterfall(int xo, int maxLength, int brickHeight, double rand){
 		int length=20;
 
 		if(length>maxLength)
@@ -775,8 +822,22 @@ public class MyLevel extends Level {
 		 int floor = height - 1;	
 		for (int x = xo; x < xo + length-1; x++)
         	{
-		setBlock(x, floor - brickHeight, BLOCK_EMPTY);
-                    BLOCKS_EMPTY++;
+			 if(rand<.5){
+			setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+                    	BLOCKS_EMPTY++;
+			}
+			else{
+				if(x%4==0){
+					setBlock(x, floor - brickHeight, BLOCK_EMPTY);
+                    			BLOCKS_EMPTY++;
+					//setBlock(x-1, floor - brickHeight+2, BLOCK_EMPTY);
+                    			//BLOCKS_EMPTY++;
+				}
+				else{
+					setBlock(x, floor - brickHeight, COIN);
+                    			COINS++;
+				}
+			}
 		}
 
 		setBlock(xo+length-2,floor-brickHeight-1,BLOCK_EMPTY);
@@ -785,8 +846,20 @@ public class MyLevel extends Level {
 		for (int x = xo+1; x < xo+length-2; x++)
         	{
                 type = Enemy.ENEMY_GOOMBA;
-                setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,false));
-                ENEMIES++;
+		if(rand<.5){
+                	setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,false));
+                	ENEMIES++;
+			}
+		else{	
+			if(Math.random()<.5){
+			setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,true));
+                	ENEMIES++;
+			}
+			else{
+			setSpriteTemplate(x, floor-brickHeight-1, new SpriteTemplate(type,false));
+                	ENEMIES++;
+			}
+			}
         	}
 
 		return length;
